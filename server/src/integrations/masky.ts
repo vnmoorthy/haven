@@ -21,6 +21,8 @@ const stats = { spoken: 0, liveTurns: 0, audioReady: 0, errors: 0, lastError: ''
 const base = () => (config.masky.baseUrl || 'https://masky.ai/api').replace(/\/$/, '');
 const live = () => !!config.masky.apiKey;
 const FEMALE: AgentId[] = ['aria', 'nova', 'mira', 'iris', 'juno'];
+const hostedPortrait = (agentId: string) => `https://vnmoorthy.github.io/haven/docs/assets/avatars/${agentId}.png`;
+let speakPausedUntil = 0; // circuit breaker after a 402 (no Masky credits) so the UI never waits on doomed calls
 
 async function api<T = any>(method: 'GET' | 'POST', path: string, body?: any, timeoutMs = 20000): Promise<T> {
   const ctrl = new AbortController();
@@ -88,9 +90,18 @@ async function provisionOne(agentId: AgentId, voiceId?: string): Promise<MaskyAv
   const e = employee(agentId);
   let rec: MaskyAvatar | undefined = existing?.avatarId ? existing : undefined;
   if (!rec) {
-    const img = await api<any>('POST', '/images/generate', { prompt: portraitPrompt(agentId), aspectRatio: '1:1' }, 60000);
-    const imageUrl = img.imageUrl ?? img.url ?? img.image?.url ?? img.images?.[0]?.url;
-    if (!imageUrl) throw new Error('Masky image generation returned no imageUrl');
+    // Reuse an avatar this account already has for the employee (survives demo resets and free-plan limits).
+    const list = await api<any>('GET', '/avatars', undefined, 15000).catch(() => ({ avatars: [] }));
+    const found = (list.avatars ?? []).find((a: any) => String(a.displayName ?? '').startsWith(`${e.name} · Haven`));
+    if (found?.avatarId) {
+      rec = { avatarId: found.avatarId, avatarOwnerUserId: found.avatarOwnerUserId ?? list.owner?.userId, imageUrl: found.avatarImageUrl ?? found.imageUrl ?? hostedPortrait(agentId), voiceId, createdAt: now() };
+      saveAvatar(agentId, rec);
+    }
+  }
+  if (!rec) {
+    // Generate a portrait with Masky; if the account has no image credits, use Haven's hosted portrait instead.
+    const img = await api<any>('POST', '/images/generate', { prompt: portraitPrompt(agentId), aspectRatio: '1:1' }, 60000).catch((err) => { console.warn('[masky] portrait generation skipped:', (err as Error).message); return {}; });
+    const imageUrl = img.imageUrl ?? img.url ?? img.image?.url ?? img.images?.[0]?.url ?? hostedPortrait(agentId);
     const created = await api<any>('POST', '/avatars', {
       displayName: `${e.name} · Haven ${e.title}`, imageUrl,
       personalityPrompt: `You are ${e.name}, ${e.title} at Haven, an AI-native Trust & Safety company. ${e.personality} Responsibilities: ${e.responsibilities.join('; ')}.`,
@@ -98,7 +109,7 @@ async function provisionOne(agentId: AgentId, voiceId?: string): Promise<MaskyAv
     }, 30000);
     const a = created.avatar ?? created;
     if (!a?.avatarId) throw new Error('Masky avatar creation returned no avatarId');
-    rec = { avatarId: a.avatarId, avatarOwnerUserId: a.avatarOwnerUserId, imageUrl: a.imageUrl ?? imageUrl, voiceId, createdAt: now() };
+    rec = { avatarId: a.avatarId, avatarOwnerUserId: a.avatarOwnerUserId, imageUrl: a.avatarImageUrl ?? a.imageUrl ?? imageUrl, voiceId, createdAt: now() };
     saveAvatar(agentId, rec);
   }
   if (!rec.conversationId) {
@@ -152,8 +163,10 @@ function speakable(text: string) {
 }
 
 async function speakLive(agentId: AgentId, text: string): Promise<{ audioUrl?: string; liveUrl?: string } | null> {
+  if (now() < speakPausedUntil) return null;
   try {
     let rec = avatars()[agentId];
+    if (!rec?.conversationId && Object.keys(avatars()).length && !avatars()[agentId]) return null; // only provisioned employees speak via Masky
     if (!rec?.conversationId) rec = await provisionOne(agentId, (await pickVoices())[agentId]);
     const posted = await api<any>('POST', `/conversations/${rec.conversationId}/turn`, { userText: speakable(text), output: 'audio', mode: 'speak' }, 10000);
     stats.liveTurns++;
@@ -172,6 +185,7 @@ async function speakLive(agentId: AgentId, text: string): Promise<{ audioUrl?: s
     return { liveUrl: rec.liveUrl };
   } catch (e) {
     stats.errors++; stats.lastError = (e as Error).message;
+    if (/402|credit/i.test(stats.lastError)) speakPausedUntil = now() + 120000;
     console.warn('[masky] speak failed → browser TTS:', stats.lastError);
     return null;
   }

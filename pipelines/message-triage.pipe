@@ -113,17 +113,17 @@
     },
     {
       "id": "llm_openai_1",
-      "provider": "llm_openai",
+      "provider": "llm_openai_api",
       "name": "Flatkey model gateway (fast tier)",
       "config": {
-        "profile": "openai-4o",
-        "openai-4o": {
+        "profile": "custom",
+        "custom": {
+          "model": "gemini-3.1-flash-lite",
+          "base_url": "https://router.flatkey.ai/v1",
+          "modelTotalTokens": 32768,
           "apikey": "${ROCKETRIDE_FLATKEY_KEY}"
         },
-        "parameters": {
-          "base_url": "https://router.flatkey.ai/v1",
-          "model": "gpt-4o-mini"
-        }
+        "parameters": {}
       },
       "input": [
         {
@@ -139,47 +139,21 @@
       }
     },
     {
-      "id": "extract_data_1",
-      "provider": "extract_data",
-      "name": "Route decision",
+      "id": "response_answers_1",
+      "provider": "response_answers",
+      "name": "Risk verdict \u2192 Haven",
       "config": {
-        "parameters": {
-          "format": "json"
-        }
+        "laneName": "answers"
       },
       "input": [
         {
           "lane": "answers",
           "from": "llm_openai_1"
-        },
-        {
-          "lane": "tags",
-          "from": "ner_1"
         }
       ],
       "ui": {
         "position": {
-          "x": 1620,
-          "y": 160
-        }
-      }
-    },
-    {
-      "id": "response_json_1",
-      "provider": "response_json",
-      "name": "Triage verdict",
-      "config": {
-        "laneName": "json"
-      },
-      "input": [
-        {
-          "lane": "json",
-          "from": "extract_data_1"
-        }
-      ],
-      "ui": {
-        "position": {
-          "x": 1880,
+          "x": 1580,
           "y": 160
         }
       }

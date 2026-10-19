@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { config, ROOT } from '../config.js';
@@ -47,6 +48,7 @@ const STAGE_DESC: Record<string, string> = {
   'message-triage/llm_openai_1': 'Classifies risk through the Flatkey gateway (fast tier, automatic model failover).',
   'message-triage/extract_data_1': 'Parses the classification JSON and decides the route: allow, monitor, review or quarantine + which specialist owns it.',
   'message-triage/response_json_1': 'Returns the triage verdict to Haven\'s orchestrator.',
+  'message-triage/response_answers_1': 'Returns the model\'s risk verdict to Haven\'s orchestrator, which routes it to the right specialist over BAND.',
   'link-forensics/webhook_1': 'Receives a suspicious URL plus incident context.',
   'link-forensics/tool_http_request_1': 'Detonates the link in an isolated sandbox computer (Celesto) with a browser agent (AdaL) that follows redirects and screenshots the page.',
   'link-forensics/extract_data_1': 'Extracts forensic signals: redirects, credential forms, look-alike domains, TLD and entropy risk.',
@@ -519,6 +521,7 @@ function defaultHandler(provider: string, component: PipeComponent): StageHandle
       };
 
     case 'llm_openai':
+    case 'llm_openai_api':
     case 'agent_rocketride':
       return async (input, ctx) => {
         const env = asEnvelope(input);
@@ -641,9 +644,11 @@ async function mirrorToCloud(pipelineId: string, input: any): Promise<boolean> {
     const client = new Client({ auth: key, uri: rrUri() });
     if (typeof client.connect === 'function') await client.connect();
     try {
-      const used = await client.use({ filepath: path.join(PIPE_DIR, `${pipelineId}.pipe`) });
+      // Fresh task token per run (a reused pipe would fail with "already running"); provider keys go in as ROCKETRIDE_* env.
+      const used = await client.use({ filepath: path.join(PIPE_DIR, `${pipelineId}.pipe`), token: `tk_${randomUUID()}`, ttl: 60, env: { ROCKETRIDE_FLATKEY_KEY: config.flatkey.apiKey } });
       const token = used?.token ?? used;
-      await client.send(token, JSON.stringify(clip(input, 8000)), { name: 'input.json' }, 'application/json');
+      const text = typeof input === 'string' ? input : String(input?.text ?? input?.url ?? input?.question ?? input?.target ?? JSON.stringify(clip(input, 4000)));
+      await client.send(token, text.slice(0, 8000), { name: 'input.txt' }, 'text/plain');
       try { await client.terminate?.(token); } catch { /* ignore */ }
     } finally { try { await client.disconnect?.(); } catch { /* ignore */ } }
     return true;

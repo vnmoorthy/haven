@@ -83,17 +83,17 @@
     },
     {
       "id": "llm_openai_1",
-      "provider": "llm_openai",
+      "provider": "llm_openai_api",
       "name": "Flatkey model gateway (fast tier)",
       "config": {
-        "profile": "openai-4o",
-        "openai-4o": {
+        "profile": "custom",
+        "custom": {
+          "model": "gemini-3.1-flash-lite",
+          "base_url": "https://router.flatkey.ai/v1",
+          "modelTotalTokens": 32768,
           "apikey": "${ROCKETRIDE_FLATKEY_KEY}"
         },
-        "parameters": {
-          "base_url": "https://router.flatkey.ai/v1",
-          "model": "gpt-4o-mini"
-        }
+        "parameters": {}
       },
       "input": [
         {

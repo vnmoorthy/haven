@@ -229,7 +229,7 @@ async function aria(inc: Incident, cls: Classification) {
   const route: Record<IncidentKind, AgentId> = { phishing: 'rex', scam: 'rex', harassment: 'juno', hate: 'juno', crisis: 'mira', spam: 'nova', raid: 'nova', bot_risk: 'kai' };
   const to = route[inc.kind];
   let note = `${employee(to).name}, please take ${inc.id}.`;
-  const r = await complete({ agentId: 'aria', purpose: 'route-incident', tier: 'reasoning', timeoutMs: 6000, maxTokens: 90, system: systemFor('aria', 'Write ONE short delegation sentence (max 25 words) to the specialist. No preamble.'), messages: [{ role: 'user', content: `Incident ${inc.id} (${inc.kind}, risk ${inc.risk}): ${inc.title}. Delegate to ${employee(to).name} (${employee(to).title}). Triage reasons: ${cls.reasons.join(', ')}` }] });
+  const r = await complete({ agentId: 'aria', purpose: 'route-incident', tier: 'fast', timeoutMs: 3500, maxTokens: 90, system: systemFor('aria', 'Write ONE short delegation sentence (max 25 words) to the specialist. No preamble.'), messages: [{ role: 'user', content: `Incident ${inc.id} (${inc.kind}, risk ${inc.risk}): ${inc.title}. Delegate to ${employee(to).name} (${employee(to).title}). Triage reasons: ${cls.reasons.join(', ')}` }] });
   if (r?.text) note = r.text.trim().replace(/^"|"$/g, '');
   else recordOffline('aria', 'route-incident', 'reasoning', inc.title, note);
   updateIncident(inc.id, { assignedTo: to });
