@@ -48,7 +48,7 @@ The script is idempotent: it overwrites `deck/Haven-Pitch.pptx` every time.
 | `incident-room.png` | 6 · Live demo |
 | `audit.png` | 7 · Safety & trust |
 
-Any aspect ratio works. Each image is cropped to fill its frame, keeping the top-left corner (where the app's sidebar and header are). If a file is missing, the slide shows a drawn mock instead of a broken image. The web version loads the same files from `../docs/screenshots/` and also uses `community.png` and `ask.png` if present.
+Any aspect ratio works. Each image is cropped to fill its frame, keeping the top-left corner (where the app's sidebar and header are). If a file is missing, the slide shows a drawn mock instead of a broken image. The web version loads the same files from `../docs/screenshots/`.
 
 Optional environment variables: `HAVEN_SHOTS=/path/to/pngs` to use another screenshot folder, and `HAVEN_DECK_OUT=/path/out.pptx` to write somewhere else.
 

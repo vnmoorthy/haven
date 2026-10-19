@@ -57,11 +57,25 @@ async function pickVoices(): Promise<Record<string, string | undefined>> {
     voicesCache = (v.voices ?? v ?? []).filter((x: any) => x?.id).map((x: any) => ({ id: String(x.id), name: String(x.name ?? '') }));
   }
   const voices = voicesCache ?? [];
+  // Hand-cast voices per employee (Masky preset names); fall back to heuristics if a preset disappears.
+  const CAST: Record<string, string[]> = {
+    mira: ['Warm American Female', 'Caring Mother', 'Female Meditation Guide'], rex: ['Deep Male Conversational Voice', 'Cool Journalist', 'Brooding Intellectual Man'],
+    aria: ['Inspiring Woman', 'Serene Assistant', 'Warm Female Assistant Voice'], kai: ['Conversational English Guy', 'Male Podcaster', 'Benjamin'],
+    nova: ['Expressive Girl', 'Ellie', 'Cheerful Canadian'], iris: ['Emma', 'Claire', 'Florence'], juno: ['Claire', 'Lady Elizabeth', 'Demure Conversationalist'],
+    leo: ['Casual Podcast Host', 'Friendly Kiwi Guy', 'Trevor'],
+  };
+  const cast: Record<string, string | undefined> = {};
+  const taken = new Set<string>();
+  for (const e of ROSTER) {
+    const hit = (CAST[e.id] ?? []).map((n) => voices.find((v) => v.name === n)).find((v) => v && !taken.has(v.id));
+    if (hit) { cast[e.id] = hit.id; taken.add(hit.id); }
+  }
+  if (Object.keys(cast).length === ROSTER.length) return cast;
   const fem = voices.filter((v) => /female|woman|girl|lady/i.test(v.name));
   const male = voices.filter((v) => /\bmale\b|\bman\b|guy|deep/i.test(v.name) && !/female|woman/i.test(v.name));
-  const used = new Set<string>();
-  const out: Record<string, string | undefined> = {};
-  for (const e of ROSTER) {
+  const used = new Set<string>(taken);
+  const out: Record<string, string | undefined> = { ...cast };
+  for (const e of ROSTER.filter((x) => !cast[x.id])) {
     const pool = FEMALE.includes(e.id) ? fem : male;
     const choice = pool.find((v) => !used.has(v.id)) ?? voices.find((v) => !used.has(v.id)) ?? voices[0];
     if (choice) { used.add(choice.id); out[e.id] = choice.id; }

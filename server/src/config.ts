@@ -1,9 +1,12 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const ROOT = resolve(here, '../..');
+// Keys live in the repo-root .env (npm workspaces run the server from server/, so load it explicitly).
+dotenv.config({ path: resolve(ROOT, '.env'), quiet: true } as any);
+dotenv.config({ path: resolve(ROOT, 'server/.env'), quiet: true } as any);
 
 const env = (k: string, d = '') => (process.env[k] ?? d).trim();
 const bool = (k: string, d = false) => { const v = env(k); return v ? ['1', 'true', 'yes', 'on'].includes(v.toLowerCase()) : d; };
@@ -19,12 +22,12 @@ export const config = {
     apiKey: env('FLATKEY_API_KEY'),
     baseUrl: env('FLATKEY_BASE_URL', 'https://router.flatkey.ai/v1'),
     models: {
-      fast: env('FLATKEY_MODEL_FAST', 'gpt-4o-mini'),
-      reasoning: env('FLATKEY_MODEL_REASONING', 'claude-sonnet-4-5'),
-      coding: env('FLATKEY_MODEL_CODING', 'claude-sonnet-4-5'),
-      vision: env('FLATKEY_MODEL_VISION', 'gemini-2.5-flash'),
+      fast: env('FLATKEY_MODEL_FAST', 'gemini-3.1-flash-lite'),
+      reasoning: env('FLATKEY_MODEL_REASONING', 'claude-haiku-4-5'),
+      coding: env('FLATKEY_MODEL_CODING', 'claude-haiku-4-5'),
+      vision: env('FLATKEY_MODEL_VISION', 'gemini-3.1-flash-lite'),
     },
-    fallbacks: env('FLATKEY_FALLBACK_MODELS', 'gpt-4o-mini,deepseek-chat').split(',').map((s) => s.trim()).filter(Boolean),
+    fallbacks: env('FLATKEY_FALLBACK_MODELS', 'deepseek-v4-flash,gemini-3.1-flash-lite').split(',').map((s) => s.trim()).filter(Boolean),
   },
   anthropicKey: env('ANTHROPIC_API_KEY'),
   anthropicModel: env('ANTHROPIC_MODEL', 'claude-haiku-4-5'),
@@ -32,6 +35,7 @@ export const config = {
   openaiBaseUrl: env('OPENAI_BASE_URL', 'https://api.openai.com/v1'),
   openaiModel: env('OPENAI_MODEL', 'gpt-4o-mini'),
   localClaude: bool('HAVEN_LOCAL_CLAUDE', false),
+  llmBudgetUsd: Number(env('HAVEN_LLM_BUDGET_USD', '5')),
   band: { apiKey: env('BAND_USER_KEY') || env('BAND_API_KEY'), baseUrl: env('BAND_REST_URL', 'https://app.band.ai/api/v1'), workspace: env('BAND_ROOM_TITLE', 'Haven HQ — AI workforce') },
   rocketride: { apiKey: env('ROCKETRIDE_APIKEY') || env('ROCKETRIDE_API_KEY') || env('ROCKETRIDE_AUTH'), baseUrl: env('ROCKETRIDE_URI', 'https://api.rocketride.ai') },
   n8n: { url: env('N8N_URL'), apiKey: env('N8N_API_KEY') },

@@ -7,3 +7,4 @@ data/
 .DS_Store
 samples/*/node_modules/
 dist-pages/
+.haven/

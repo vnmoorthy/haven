@@ -18,6 +18,7 @@ export interface CompleteResult { text: string; model: string; provider: string;
 
 // $ per 1M tokens (input, output) — used for transparent cost accounting in the UI.
 const PRICES: Record<string, [number, number]> = {
+  'gemini-3.1-flash-lite': [0.25, 1.5], 'deepseek-v4-flash': [0.27, 1.1], 'claude-haiku-5-5': [1, 5], 'claude-sonnet-5': [3, 15],
   'gpt-4o-mini': [0.15, 0.6], 'gpt-4.1-mini': [0.4, 1.6], 'gpt-4o': [2.5, 10], 'deepseek-chat': [0.27, 1.1],
   'claude-sonnet-4-5': [3, 15], 'claude-haiku-4-5': [1, 5], 'gemini-2.5-flash': [0.3, 2.5], 'qwen-plus': [0.4, 1.2],
   'claude-cli': [0, 0], 'offline-brain': [0, 0],
@@ -51,7 +52,7 @@ async function openaiCompatible(baseUrl: string, apiKey: string, model: string, 
     });
     if (!res.ok) throw new Error(`${res.status} ${(await res.text()).slice(0, 200)}`);
     const j: any = await res.json();
-    return { text: j.choices?.[0]?.message?.content ?? '', pin: j.usage?.prompt_tokens, pout: j.usage?.completion_tokens, model: j.model || model };
+    return { text: j.choices?.[0]?.message?.content ?? '', pin: j.usage?.prompt_tokens, pout: j.usage?.completion_tokens, model: model, cost: typeof j.usage?.cost === 'number' ? j.usage.cost : undefined };
   } finally { clearTimeout(t); }
 }
 
@@ -82,8 +83,8 @@ function claudeCli(o: CompleteOpts): Promise<{ text: string; model: string }> {
   });
 }
 
-function record(o: CompleteOpts, model: string, provider: string, pin: number, pout: number, latencyMs: number, fallback: boolean, ok: boolean): LlmCall {
-  const call: LlmCall = { id: id('llm'), agentId: o.agentId, model, provider, purpose: o.purpose, promptTokens: pin, completionTokens: pout, costUsd: provider === 'offline-brain' || provider === 'claude-cli' ? 0 : price(model, pin, pout), latencyMs, fallback, createdAt: now(), ok };
+function record(o: CompleteOpts, model: string, provider: string, pin: number, pout: number, latencyMs: number, fallback: boolean, ok: boolean, realCost?: number): LlmCall {
+  const call: LlmCall = { id: id('llm'), agentId: o.agentId, model, provider, purpose: o.purpose, promptTokens: pin, completionTokens: pout, costUsd: provider === 'offline-brain' || provider === 'claude-cli' || !ok ? 0 : realCost ?? price(model, pin, pout), latencyMs, fallback, createdAt: now(), ok };
   db.insert('llm_calls', call);
   emit('llm.call', call);
   return call;
@@ -93,7 +94,10 @@ function record(o: CompleteOpts, model: string, provider: string, pin: number, p
 export async function complete(o: CompleteOpts): Promise<CompleteResult | null> {
   const promptText = (o.system ?? '') + o.messages.map((m) => m.content).join('\n');
   const t0 = now();
-  const attempts: { provider: string; model: string; run: () => Promise<{ text: string; pin?: number; pout?: number; model: string }> }[] = [];
+  const attempts: { provider: string; model: string; run: () => Promise<{ text: string; pin?: number; pout?: number; model: string; cost?: number }> }[] = [];
+  // Spend guard: stay inside the configured model budget so a demo never dies on an empty balance.
+  const spent = Number(db.raw('SELECT COALESCE(SUM(cost_usd),0) s FROM llm_calls')[0]?.s ?? 0);
+  if (spent >= config.llmBudgetUsd) return null;
   if (config.flatkey.apiKey) {
     const models = [config.flatkey.models[o.tier], ...config.flatkey.fallbacks].filter((m, i, a) => m && a.indexOf(m) === i);
     for (const m of models) attempts.push({ provider: 'flatkey', model: m, run: () => openaiCompatible(config.flatkey.baseUrl, config.flatkey.apiKey, m, o, { 'x-haven-agent': o.agentId }) });
@@ -108,7 +112,7 @@ export async function complete(o: CompleteOpts): Promise<CompleteResult | null> 
     try {
       const r = await a.run();
       const pin = r.pin ?? estTokens(promptText), pout = r.pout ?? estTokens(r.text);
-      const call = record(o, r.model || a.model, a.provider, pin, pout, now() - t1, i > 0, true);
+      const call = record(o, r.model || a.model, a.provider, pin, pout, now() - t1, i > 0, true, r.cost);
       return { text: r.text, model: call.model, provider: a.provider, fallback: i > 0, costUsd: call.costUsd, latencyMs: now() - t0 };
     } catch (err) {
       record(o, a.model, a.provider, estTokens(promptText), 0, now() - t1, i > 0, false);

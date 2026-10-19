@@ -1,4 +1,6 @@
-import { config } from '../config.js';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { config, ROOT } from '../config.js';
 import { db } from '../db.js';
 import { emit } from '../events.js';
 import { id, now } from '../util.js';
@@ -17,6 +19,13 @@ const handlers = new Map<string, Handler[]>();
 const stats = { mirrored: 0, mirrorErrors: 0, lastError: '', roomId: '' as string, agents: 0 };
 interface BandAgent { id: string; apiKey: string; name: string; handle?: string }
 
+// band.ai credentials are shown only once at registration, so they live in a gitignored file that survives demo resets.
+const CRED_DIR = join(ROOT, '.haven');
+const CRED_FILE = join(CRED_DIR, 'band-cloud.json');
+type Cloud = { roomId: string; agents: Record<string, BandAgent> };
+function loadCloud(): Cloud | null { try { return existsSync(CRED_FILE) ? JSON.parse(readFileSync(CRED_FILE, 'utf8')) : null; } catch { return null; } }
+function saveCloud(c: Cloud) { mkdirSync(CRED_DIR, { recursive: true }); writeFileSync(CRED_FILE, JSON.stringify(c, null, 2), { mode: 0o600 }); }
+
 const H = (key: string) => ({ 'X-API-Key': key, 'Content-Type': 'application/json' });
 async function bandFetch(path: string, key: string, init: RequestInit = {}) {
   const res = await fetch(`${config.band.baseUrl.replace(/\/$/, '')}${path}`, { ...init, headers: { ...H(key), ...(init.headers as any) }, signal: AbortSignal.timeout(10000) });
@@ -28,12 +37,13 @@ async function bandFetch(path: string, key: string, init: RequestInit = {}) {
 /** Register the workforce on band.ai and open the shared room (idempotent; cached in kv). */
 export async function bandBootstrap() {
   if (!config.band.apiKey) return;
-  const cached = db.kvGet<{ roomId: string; agents: Record<string, BandAgent> } | null>('band-cloud', null);
+  const cached = loadCloud();
   const agents: Record<string, BandAgent> = cached?.agents ?? {};
   for (const e of ROSTER) {
     if (agents[e.id]?.apiKey) continue;
     const r = await bandFetch('/me/agents/register', config.band.apiKey, { method: 'POST', body: JSON.stringify({ agent: { name: `Haven ${e.name}`, description: `${e.title} at Haven (AI Trust & Safety). ${e.responsibilities[0]}.` } }) });
     agents[e.id] = { id: r.data.agent.id, apiKey: r.data.credentials.api_key, name: r.data.agent.name, handle: r.data.agent.handle };
+    saveCloud({ roomId: cached?.roomId ?? '', agents });
   }
   let roomId = cached?.roomId ?? '';
   if (!roomId) {
@@ -43,7 +53,7 @@ export async function bandBootstrap() {
       await bandFetch(`/me/chats/${roomId}/participants`, config.band.apiKey, { method: 'POST', body: JSON.stringify({ participant: { participant_id: a.id, role: 'member' } }) }).catch(() => null);
     }
   }
-  db.kvSet('band-cloud', { roomId, agents });
+  saveCloud({ roomId, agents });
   stats.roomId = roomId; stats.agents = Object.keys(agents).length;
   console.log(`[band] workforce registered on band.ai — room ${roomId} with ${stats.agents} agents`);
 }
@@ -52,7 +62,7 @@ let queue: Promise<void> = Promise.resolve();
 function mirror(msg: BandMessage) {
   if (!config.band.apiKey) return;
   queue = queue.then(async () => {
-    const cloud = db.kvGet<{ roomId: string; agents: Record<string, BandAgent> } | null>('band-cloud', null);
+    const cloud = loadCloud();
     if (!cloud?.roomId) return;
     const from = cloud.agents[msg.from as string];
     const to = cloud.agents[msg.to as string];
