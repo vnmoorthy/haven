@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import clsx from 'clsx';
 import {
   LayoutDashboard, MessagesSquare, ShieldAlert, Users, Bug, Sparkles, Workflow, Presentation, Boxes, Volume2, VolumeX, Zap,
-  ChevronDown, Fish, HeartCrack, Swords, Megaphone, Waves, Link2, Radio, Play, Pause,
+  ChevronDown, Fish, HeartCrack, Swords, Megaphone, Waves, Link2, Radio, Play, Pause, RotateCcw,
 } from 'lucide-react';
 import { useHaven } from '../lib/store';
 import { api, IS_REPLAY } from '../lib/api';
@@ -164,6 +164,11 @@ export function Shell({ children }: { children: ReactNode }) {
             <button onClick={() => api.post('/api/sim/toggle', { running: !sim.running })} className="w-full flex items-center justify-between cursor-pointer group">
               <span className="text-muted group-hover:text-fg">Community traffic</span>
               <span className="inline-flex items-center gap-1 text-fg/80">{sim.running ? <><Pause size={12} /> running</> : <><Play size={12} /> paused</>}</span>
+            </button>
+            <button onClick={() => { if (confirm('Reset Haven to fresh demo data?')) void api.post('/api/reset').then(() => location.assign(import.meta.env.BASE_URL)); }}
+              className="w-full flex items-center justify-between cursor-pointer group">
+              <span className="text-muted group-hover:text-fg">Demo data</span>
+              <span className="inline-flex items-center gap-1 text-fg/80"><RotateCcw size={12} /> reset</span>
             </button>
           </div>
           <div className="text-[10.5px] text-dim leading-relaxed">8 AI employees · 1 human founder · 14 sponsor tools</div>

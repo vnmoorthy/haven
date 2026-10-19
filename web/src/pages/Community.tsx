@@ -12,6 +12,7 @@ import { MessageRow } from '../components/community/MessageRow';
 import { Composer } from '../components/community/Composer';
 import { ShieldPanel } from '../components/community/ShieldPanel';
 import { MembersList } from '../components/community/MembersList';
+import { OnboardButton } from '../components/community/OnboardButton';
 
 const LS_KEY = 'haven.community.sel';
 const readSel = (): { c?: string; ch: Record<string, string> } => {
@@ -137,6 +138,7 @@ export default function Community() {
             </button>
           );
         })}
+        <OnboardButton onDone={(id) => selectCommunity(id)} />
         <div className="mt-auto pt-2 flex flex-col items-center gap-1 text-dim" title="Protected by Haven">
           <ShieldCheck size={18} className="text-ok" />
         </div>

@@ -46,7 +46,7 @@ export const CHATTER: Record<string, string[]> = {
 
 export function seed(force = false) {
   if (!force && db.count('communities') > 0) return;
-  for (const t of ['communities', 'channels', 'members', 'messages', 'incidents', 'band_messages', 'llm_calls', 'pipeline_runs', 'automation_runs', 'audits', 'compressions', 'kv']) sqlite.exec(`DELETE FROM ${t}`);
+  for (const t of ['communities', 'channels', 'members', 'messages', 'incidents', 'band_messages', 'llm_calls', 'pipeline_runs', 'automation_runs', 'audits', 'compressions', 'kv', 'wiki']) sqlite.exec(`DELETE FROM ${t}`);
   const now = Date.now();
   const DAY = 86400000;
   for (const c of COMMUNITIES) db.insert('communities', { ...c, createdAt: now - 40 * DAY });

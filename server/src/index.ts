@@ -54,7 +54,7 @@ async function snapshot() {
 app.get('/api/health', (_q, r) => r.json({ ok: true, ts: Date.now() }));
 app.get('/api/state', wrap(snapshot));
 app.get('/api/metrics', wrap(() => company.metrics()));
-app.post('/api/reset', wrap(async () => { stopSim(); seed(true); seedWiki(); if (config.simAutostart) startSim(); hub.emitEvent('hello', await snapshot()); return { ok: true }; }));
+app.post('/api/reset', wrap(async () => { stopSim(); seed(true); seedWiki(); for (const e of ROSTER) company.setStatus(e.id, 'idle'); if (config.simAutostart) startSim(); hub.emitEvent('hello', await snapshot()); return { ok: true }; }));
 
 // Community
 app.post('/api/community/messages', wrap((req) => {
