@@ -35,7 +35,10 @@ export const replay = {
   async request<T>(method: string, path: string, body?: any): Promise<T> {
     const b = await loadBundle();
     const key = `${method} ${path}`;
-    if (path === '/api/state') return b.state as T;
+    if (path === '/api/state') {
+      const idle = Object.fromEntries(Object.keys(b.state.agentStatus ?? {}).map((k) => [k, { status: 'idle', task: null }]));
+      return { ...b.state, agentStatus: idle } as T;
+    }
     if (key === 'POST /api/sim/inject') { play(b.scenarios[body?.scenario] ?? b.scenarios.phishing); return { ok: true } as T; }
     if (key === 'POST /api/sim/toggle') { emitLocal('sim.status', { running: !!body?.running }); return { running: !!body?.running } as T; }
     if (key === 'POST /api/audits') { play(b.scenarios.audit); return b.routes['POST /api/audits'] as T; }

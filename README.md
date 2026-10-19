@@ -63,7 +63,17 @@ Haven is not a chatbot or a pile of disconnected agents. It runs like a small co
 <td width="50%"><img src="docs/screenshots/audit.png" alt="Bot audit"/><br/><sub><b>Bot Audits.</b> Snyk → Tenki sandbox → Prelint spec check → letter grade.</sub></td>
 <td width="50%"><img src="docs/screenshots/ask.png" alt="Ask Haven"/><br/><sub><b>Ask Haven.</b> Natural language → SQL → chart, plus the shared context wiki every employee reads.</sub></td>
 </tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/workforce.png" alt="AI workforce"/><br/><sub><b>AI Workforce.</b> Org chart, roles, tools, model tiers and Finch skills. Click any employee to chat with them.</sub></td>
+<td width="50%"><img src="docs/screenshots/pipelines.png" alt="Pipelines and flows"/><br/><sub><b>Pipelines & Flows.</b> RocketRide <code>.pipe</code> DAGs that run live, plus the n8n workflows.</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/screenshots/briefing.png" alt="Founder briefing"/><br/><sub><b>Founder Briefing.</b> Aria's spoken daily brief and investor-mode unit economics.</sub></td>
+<td width="50%"><img src="docs/screenshots/stack.png" alt="Sponsor stack"/><br/><sub><b>Sponsor Stack.</b> All 14 tools, each showing live or local engine, with a <i>Test connection</i> button.</sub></td>
+</tr>
 </table>
+
+> 🎤 **Presenting Haven?** Use the [10-slide motion deck (.pptx)](deck/Haven-Pitch.pptx), the [scrolling HTML deck](https://vnmoorthy.github.io/haven/deck/) and the [3-minute storyboard](docs/STORYBOARD.md).
 
 ---
 
