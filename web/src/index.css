@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-ink-950: #05060a;
+  --color-ink-900: #0a0c13;
+  --color-ink-850: #0e111a;
+  --color-ink-800: #131726;
+  --color-ink-700: #1c2135;
+  --color-ink-600: #2a3150;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-fg: #e8eaf2;
+  --color-muted: #8d93a8;
+  --color-dim: #5d6379;
+
+  --color-brand-violet: #8b5cf6;
+  --color-brand-cyan: #22d3ee;
+  --color-ok: #10b981;
+  --color-warn: #f59e0b;
+  --color-danger: #f43f5e;
+  --color-info: #60a5fa;
+
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-spin-slow: spin 8s linear infinite;
+  --animate-ping-slow: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+}
+
+:root { color-scheme: dark; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-ink-950);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+}
+
+/* Ambient background: aurora + fine grid */
+.haven-bg {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgb(139 92 246 / 0.16), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgb(34 211 238 / 0.10), transparent 60%),
+    radial-gradient(800px 600px at 50% 120%, rgb(244 63 94 / 0.06), transparent 60%),
+    var(--color-ink-950);
+}
+.grid-bg {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+}
+
+.panel {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.02));
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 20px 40px -24px rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(12px);
+}
+.panel-hover { transition: border-color .2s, transform .2s, background .2s; }
+.panel-hover:hover { border-color: var(--color-line-strong); background: linear-gradient(180deg, rgb(255 255 255 / 0.06), rgb(255 255 255 / 0.025)); }
+
+.text-gradient {
+  background: linear-gradient(92deg, #c4b5fd 0%, #8b5cf6 30%, #22d3ee 75%, #67e8f9 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.brand-gradient { background: linear-gradient(135deg, #8b5cf6, #22d3ee); }
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.08), transparent);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+.glow-ring { box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08), 0 0 24px -4px var(--glow, #8b5cf6); }
+
+.scroll-thin { scrollbar-width: thin; scrollbar-color: rgb(255 255 255 / 0.12) transparent; }
+.scroll-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scroll-thin::-webkit-scrollbar-thumb { background: rgb(255 255 255 / 0.1); border-radius: 8px; }
+
+.mono { font-family: var(--font-mono); }
+.kbd { font-family: var(--font-mono); font-size: 11px; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--color-line-strong); background: rgb(255 255 255 / 0.04); }
+
+/* Markdown inside panels */
+.prose-haven p { margin: 0 0 .6em; line-height: 1.6; }
+.prose-haven ul { margin: .2em 0 .8em 1.1em; list-style: disc; }
+.prose-haven li { margin: .25em 0; }
+.prose-haven strong { color: #fff; }
+.prose-haven code { font-family: var(--font-mono); font-size: .85em; background: rgb(255 255 255 / 0.06); padding: 1px 5px; border-radius: 5px; }
+.prose-haven h1, .prose-haven h2, .prose-haven h3 { font-weight: 600; margin: .8em 0 .4em; }
+
+/* React Flow dark tweaks */
+.react-flow__attribution { display: none; }
+.react-flow__edge-path { stroke: rgb(255 255 255 / 0.25); }

@@ -1,0 +1,143 @@
+{
+  "components": [
+    {
+      "id": "webhook_1",
+      "provider": "webhook",
+      "name": "Suspicious link webhook",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "parameters": {},
+        "type": "webhook"
+      },
+      "ui": {
+        "position": {
+          "x": 60,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "tool_http_request_1",
+      "provider": "tool_http_request",
+      "name": "Detonate in sandbox (AdaL + Celesto)",
+      "config": {
+        "parameters": {
+          "url": "http://localhost:8787/api/tools/detonate",
+          "method": "POST",
+          "timeout": 45
+        }
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "webhook_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 320,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "extract_data_1",
+      "provider": "extract_data",
+      "name": "Forensic signal extraction",
+      "config": {
+        "parameters": {
+          "format": "json"
+        }
+      },
+      "input": [
+        {
+          "lane": "json",
+          "from": "tool_http_request_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 580,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "prompt_1",
+      "provider": "prompt",
+      "name": "Verdict prompt",
+      "config": {
+        "parameters": {
+          "instructions": "Given the sandbox forensic signals, return JSON {verdict, score (0-100), reasons[], recommendedAction}."
+        }
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "extract_data_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 840,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "llm_openai_1",
+      "provider": "llm_openai",
+      "name": "Flatkey model gateway (fast tier)",
+      "config": {
+        "profile": "openai-4o",
+        "openai-4o": {
+          "apikey": "${ROCKETRIDE_FLATKEY_KEY}"
+        },
+        "parameters": {
+          "base_url": "https://router.flatkey.ai/v1",
+          "model": "gpt-4o-mini"
+        }
+      },
+      "input": [
+        {
+          "lane": "questions",
+          "from": "prompt_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1100,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "response_json_1",
+      "provider": "response_json",
+      "name": "Forensic verdict",
+      "config": {
+        "laneName": "json"
+      },
+      "input": [
+        {
+          "lane": "answers",
+          "from": "llm_openai_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1360,
+          "y": 160
+        }
+      }
+    }
+  ],
+  "project_id": "68f45c34-985b-48bd-954a-605cae667991",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "version": 1
+}

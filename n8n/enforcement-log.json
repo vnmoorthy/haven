@@ -1,0 +1,180 @@
+{
+  "name": "Haven · Enforcement audit log",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "haven-enforcement-log",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "9a6f1513-7d09-4673-80be-5f74afae9126",
+      "id": "9e48272f-26f1-4617-b824-0eda3c251583",
+      "name": "Enforcement webhook",
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eebae13b-538f-4c7e-b605-469e58985a31",
+              "name": "auditId",
+              "value": "={{ 'enf_' + Date.now().toString(36) }}",
+              "type": "string"
+            },
+            {
+              "id": "05825be2-938f-4f0d-a247-6fcea5a0c9f6",
+              "name": "incidentId",
+              "value": "={{ $json.body.incidentId }}",
+              "type": "string"
+            },
+            {
+              "id": "efbe7efe-53f7-410b-a62d-f2564faebe8e",
+              "name": "action",
+              "value": "={{ $json.body.action }}",
+              "type": "string"
+            },
+            {
+              "id": "523b3112-7ef7-469e-97c9-70dbeb2f63d9",
+              "name": "memberId",
+              "value": "={{ $json.body.memberId || $json.body.member || [].concat($json.body.members || []).join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "db8ec853-7531-41c0-a31a-4eb0cafddfe3",
+              "name": "actor",
+              "value": "={{ $json.body.actor || 'haven' }}",
+              "type": "string"
+            },
+            {
+              "id": "26d1dd57-069c-4854-9f2a-2d4fe7c58bff",
+              "name": "approvedBy",
+              "value": "={{ $json.body.approvedBy || 'policy:auto' }}",
+              "type": "string"
+            },
+            {
+              "id": "be8c426a-cc3d-4c8a-9f2d-9f9c2667898c",
+              "name": "reason",
+              "value": "={{ $json.body.reason || $json.body.rationale || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "80b16c1f-19a1-4a1e-aada-05224df8ba43",
+              "name": "recordedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "id": "08580d0b-3491-4716-a2c9-cf934265bf93",
+      "name": "Set audit record",
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8787/api/hooks/enforced",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "5cb4c334-2c4f-40d3-9d0c-cbf7c18d188b",
+      "name": "Write to Haven audit trail",
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, auditId: $('Set audit record').item.json.auditId }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "id": "a92b08a3-5fbc-477f-b9a0-f98d476ee954",
+      "name": "Respond",
+      "position": [
+        960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Enforcement webhook": {
+      "main": [
+        [
+          {
+            "node": "Set audit record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set audit record": {
+      "main": [
+        [
+          {
+            "node": "Write to Haven audit trail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write to Haven audit trail": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "haven"
+    },
+    {
+      "name": "audit"
+    },
+    {
+      "name": "compliance"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "haven"
+  }
+}

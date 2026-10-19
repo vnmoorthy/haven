@@ -1,0 +1,250 @@
+{
+  "name": "Haven · Moderator alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "haven-moderator-alert",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "28725d8e-9c79-4955-9d88-3c3ea9086eb3",
+      "id": "4284dac2-b1f5-4891-b914-2b3c74f182df",
+      "name": "Incident webhook",
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "3713f4e5-0a25-4879-ab4f-a98607128f4a",
+              "leftValue": "={{ $json.body.severity }}",
+              "rightValue": "critical",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "id": "8d21b3ed-d6dd-4262-a0a4-9f9d8e834835",
+      "name": "Is critical?",
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: ':rotating_light: *CRITICAL* ' + ($json.body.kind || 'incident') + ' — ' + ($json.body.title || 'Untitled incident') + '\\n' + ($json.body.summary || $json.body.rationale || '') + '\\nAssigned: ' + ($json.body.assignedTo || 'aria') + ' · Risk ' + ($json.body.risk ?? '?') }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "c5676769-9310-4a5d-98df-b59f0715edbc",
+      "name": "Post to #mod-alerts (Slack)",
+      "position": [
+        720,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "aria@haven.ai",
+        "toEmail": "={{ $env.HAVEN_ONCALL_EMAIL || 'oncall@haven.ai' }}",
+        "subject": "=[CRITICAL] {{ $('Incident webhook').item.json.body.title || 'Haven incident' }}",
+        "emailFormat": "text",
+        "text": "=Haven escalated a critical incident.\n\nTitle: {{ $('Incident webhook').item.json.body.title }}\nKind: {{ $('Incident webhook').item.json.body.kind }}\nRisk: {{ $('Incident webhook').item.json.body.risk }}\nSummary: {{ $('Incident webhook').item.json.body.summary || $('Incident webhook').item.json.body.rationale }}\nRecommended action: {{ $('Incident webhook').item.json.body.action || 'review' }}\nIncident: {{ $('Incident webhook').item.json.body.incidentId }}\n\nOpen the Haven console to approve or override the recommended action.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "credentials": {
+        "smtp": {
+          "id": "haven-smtp",
+          "name": "Haven SMTP"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "id": "ac8625c1-c884-4d79-8351-ca3f4ee22c06",
+      "name": "Email on-call moderator",
+      "position": [
+        960,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3c583081-f649-421b-89ab-1d122673719c",
+              "name": "digest",
+              "value": "daily",
+              "type": "string"
+            },
+            {
+              "id": "9872439b-a0e7-475d-8fa9-2d8629d905f9",
+              "name": "title",
+              "value": "={{ $json.body.title }}",
+              "type": "string"
+            },
+            {
+              "id": "d6b44740-68b3-4dd9-bc56-42bdb2d2e4c5",
+              "name": "severity",
+              "value": "={{ $json.body.severity }}",
+              "type": "string"
+            },
+            {
+              "id": "d3d8da6b-d53b-41c5-897d-0751b79e1751",
+              "name": "incidentId",
+              "value": "={{ $json.body.incidentId }}",
+              "type": "string"
+            },
+            {
+              "id": "bf2513bc-a920-464d-a76a-c6f8e2abc54d",
+              "name": "queuedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "id": "158260d0-643c-48a8-a193-bb7f912738dd",
+      "name": "Add to moderator digest",
+      "position": [
+        720,
+        408
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, routed: $('Incident webhook').item.json.body.severity === 'critical' ? 'paged' : 'digest' }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "id": "91285713-6526-4f66-a9d9-5237cc6e4678",
+      "name": "Respond",
+      "position": [
+        1200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Incident webhook": {
+      "main": [
+        [
+          {
+            "node": "Is critical?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is critical?": {
+      "main": [
+        [
+          {
+            "node": "Post to #mod-alerts (Slack)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add to moderator digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post to #mod-alerts (Slack)": {
+      "main": [
+        [
+          {
+            "node": "Email on-call moderator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email on-call moderator": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to moderator digest": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "haven"
+    },
+    {
+      "name": "alerts"
+    },
+    {
+      "name": "safety-ops"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "haven"
+  }
+}

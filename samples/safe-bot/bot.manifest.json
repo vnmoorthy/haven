@@ -1,0 +1,17 @@
+{
+  "name": "Friendly Greeter",
+  "version": "1.4.0",
+  "author": "Open Community Tools (verified publisher)",
+  "homepage": "https://github.com/open-community-tools/friendly-greeter",
+  "description": "Welcomes new members and answers !rules and !help. Stores nothing.",
+  "permissions": ["SEND_MESSAGES", "EMBED_LINKS"],
+  "intents": ["GUILDS", "GUILD_MEMBERS"],
+  "intentPurpose": {
+    "GUILD_MEMBERS": "Needed to receive the member-join event so the bot can post a welcome message."
+  },
+  "dataRetention": "0 days",
+  "dataCollected": [],
+  "webhooks": [],
+  "telemetry": null,
+  "privacyPolicy": "https://github.com/open-community-tools/friendly-greeter/blob/main/PRIVACY.md"
+}

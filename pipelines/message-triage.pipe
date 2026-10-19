@@ -1,0 +1,195 @@
+{
+  "components": [
+    {
+      "id": "webhook_1",
+      "provider": "webhook",
+      "name": "Community message webhook",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "parameters": {},
+        "type": "webhook"
+      },
+      "ui": {
+        "position": {
+          "x": 60,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "anonymize_text_1",
+      "provider": "anonymize_text",
+      "name": "PII redaction",
+      "config": {
+        "parameters": {
+          "entities": [
+            "EMAIL",
+            "PHONE",
+            "CREDIT_CARD",
+            "IP_ADDRESS"
+          ],
+          "replacement": "mask"
+        }
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "webhook_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 320,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "ner_1",
+      "provider": "ner",
+      "name": "Signal extraction (URLs, mentions, entities)",
+      "config": {
+        "parameters": {}
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "anonymize_text_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 580,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "guardrails_1",
+      "provider": "guardrails",
+      "name": "Policy pre-filter",
+      "config": {
+        "profile": "strict",
+        "strict": {
+          "policy_mode": "block"
+        },
+        "parameters": {}
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "ner_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 840,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "prompt_1",
+      "provider": "prompt",
+      "name": "Risk classification prompt",
+      "config": {
+        "parameters": {
+          "instructions": "Classify the community message. Return JSON {labels, risk (0-100), kind, severity, rationale}."
+        }
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "guardrails_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1100,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "llm_openai_1",
+      "provider": "llm_openai",
+      "name": "Flatkey model gateway (fast tier)",
+      "config": {
+        "profile": "openai-4o",
+        "openai-4o": {
+          "apikey": "${ROCKETRIDE_FLATKEY_KEY}"
+        },
+        "parameters": {
+          "base_url": "https://router.flatkey.ai/v1",
+          "model": "gpt-4o-mini"
+        }
+      },
+      "input": [
+        {
+          "lane": "questions",
+          "from": "prompt_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1360,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "extract_data_1",
+      "provider": "extract_data",
+      "name": "Route decision",
+      "config": {
+        "parameters": {
+          "format": "json"
+        }
+      },
+      "input": [
+        {
+          "lane": "answers",
+          "from": "llm_openai_1"
+        },
+        {
+          "lane": "tags",
+          "from": "ner_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1620,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "response_json_1",
+      "provider": "response_json",
+      "name": "Triage verdict",
+      "config": {
+        "laneName": "json"
+      },
+      "input": [
+        {
+          "lane": "json",
+          "from": "extract_data_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1880,
+          "y": 160
+        }
+      }
+    }
+  ],
+  "project_id": "8f3d2b6c-705d-4665-9921-1c231e7c6410",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "version": 1
+}

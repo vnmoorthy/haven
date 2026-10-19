@@ -1,0 +1,15 @@
+{
+  "name": "haven-friendly-greeter",
+  "version": "1.4.0",
+  "description": "Greeter: welcomes new members and answers !rules / !help. Minimal permissions, no data stored.",
+  "main": "src/index.js",
+  "author": "Open Community Tools <maintainers@opencommunity.example>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test/run.js"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}

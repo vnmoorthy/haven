@@ -1,0 +1,171 @@
+{
+  "components": [
+    {
+      "id": "webhook_1",
+      "provider": "webhook",
+      "name": "Bot audit request",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "parameters": {},
+        "type": "webhook"
+      },
+      "ui": {
+        "position": {
+          "x": 60,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "tool_http_request_1",
+      "provider": "tool_http_request",
+      "name": "Snyk dependency & code scan",
+      "config": {
+        "parameters": {
+          "url": "http://localhost:8787/api/tools/snyk",
+          "method": "POST",
+          "timeout": 60
+        }
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "webhook_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 320,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "tool_http_request_2",
+      "provider": "tool_http_request",
+      "name": "Tenki sandboxed test run",
+      "config": {
+        "parameters": {
+          "url": "http://localhost:8787/api/tools/tenki",
+          "method": "POST",
+          "timeout": 90
+        }
+      },
+      "input": [
+        {
+          "lane": "json",
+          "from": "tool_http_request_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 580,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "guardrails_1",
+      "provider": "guardrails",
+      "name": "Prelint spec check",
+      "config": {
+        "profile": "strict",
+        "strict": {
+          "policy_mode": "block"
+        },
+        "parameters": {
+          "spec": "specs/index-v5"
+        }
+      },
+      "input": [
+        {
+          "lane": "json",
+          "from": "tool_http_request_2"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 840,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "prompt_1",
+      "provider": "prompt",
+      "name": "Security review prompt",
+      "config": {
+        "parameters": {
+          "instructions": "Grade the bot A-F from scan, test and spec results. Return JSON {grade, score, summary, findings[]}."
+        }
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "guardrails_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1100,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "llm_openai_1",
+      "provider": "llm_openai",
+      "name": "Flatkey model gateway (fast tier)",
+      "config": {
+        "profile": "openai-4o",
+        "openai-4o": {
+          "apikey": "${ROCKETRIDE_FLATKEY_KEY}"
+        },
+        "parameters": {
+          "base_url": "https://router.flatkey.ai/v1",
+          "model": "gpt-4o-mini"
+        }
+      },
+      "input": [
+        {
+          "lane": "questions",
+          "from": "prompt_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1360,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "response_json_1",
+      "provider": "response_json",
+      "name": "Audit report",
+      "config": {
+        "laneName": "json"
+      },
+      "input": [
+        {
+          "lane": "answers",
+          "from": "llm_openai_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1620,
+          "y": 160
+        }
+      }
+    }
+  ],
+  "project_id": "1ea8aadf-f292-4784-b727-a906e5c71570",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "version": 1
+}

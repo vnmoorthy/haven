@@ -1,0 +1,149 @@
+{
+  "name": "Haven · Weekly safety report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "id": "a514cfb7-b5f3-4379-b381-c0787805b46e",
+      "name": "Every Monday 09:00",
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://localhost:8787/api/metrics",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "4f95fb90-e676-4212-a6e3-2d5fb34e8bae",
+      "name": "Fetch safety metrics",
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8787/api/ask",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ question: 'Which incident kinds were most common this week and how fast did we act on them?' }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "16aadb08-68f9-4273-9750-8a4651a1b5bd",
+      "name": "Ask Iris (PromptQL)",
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "aria@haven.ai",
+        "toEmail": "={{ $env.HAVEN_FOUNDER_EMAIL || 'founders@haven.ai' }}",
+        "subject": "=Haven weekly safety report — {{ $('Fetch safety metrics').item.json.threatsBlocked }} threats blocked",
+        "emailFormat": "text",
+        "text": "=Weekly safety report\n\nMessages screened: {{ $('Fetch safety metrics').item.json.screened }}\nThreats blocked: {{ $('Fetch safety metrics').item.json.threatsBlocked }}\nIncidents resolved: {{ $('Fetch safety metrics').item.json.incidentsResolved }}\nOpen incidents: {{ $('Fetch safety metrics').item.json.incidentsOpen }}\nMedian time to action: {{ Math.round(($('Fetch safety metrics').item.json.medianTimeToActionMs || 0) / 1000) }}s\nModel spend: ${{ Number($('Fetch safety metrics').item.json.llmSpendUsd || 0).toFixed(4) }}\nHuman hours saved: {{ $('Fetch safety metrics').item.json.humanHoursSaved }}\n\nIris says:\n{{ $json.answer }}\n\n— Haven",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "credentials": {
+        "smtp": {
+          "id": "haven-smtp",
+          "name": "Haven SMTP"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "id": "a75ab7b5-7af3-40d8-9a83-6f6c87cd8af3",
+      "name": "Email weekly report",
+      "position": [
+        960,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Every Monday 09:00": {
+      "main": [
+        [
+          {
+            "node": "Fetch safety metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch safety metrics": {
+      "main": [
+        [
+          {
+            "node": "Ask Iris (PromptQL)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Iris (PromptQL)": {
+      "main": [
+        [
+          {
+            "node": "Email weekly report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "haven"
+    },
+    {
+      "name": "reporting"
+    },
+    {
+      "name": "intelligence"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "haven"
+  }
+}

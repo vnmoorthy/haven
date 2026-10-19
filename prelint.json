@@ -1,0 +1,1 @@
+{"version":1,"exclude_authors":["dependabot[bot]","renovate[bot]"],"trigger_mode":"auto","ignore_patterns":["samples/**","!specs/**","data/**"]}

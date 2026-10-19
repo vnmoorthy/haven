@@ -1,0 +1,111 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Haven architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{width:1800px;height:1120px;background:#05060a;color:#e8eaf2;font-family:Inter,sans-serif;position:relative;overflow:hidden}
+.bg{position:absolute;inset:0;background:radial-gradient(900px 500px at 0% 0%,rgba(139,92,246,.22),transparent 60%),radial-gradient(900px 500px at 100% 100%,rgba(34,211,238,.16),transparent 60%)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:30px 30px}
+h1{position:absolute;left:60px;top:40px;font-size:34px;font-weight:800;letter-spacing:-.02em}
+h1 span{background:linear-gradient(92deg,#c4b5fd,#22d3ee);-webkit-background-clip:text;color:transparent}
+.sub{position:absolute;left:60px;top:88px;color:#8d93a8;font-size:16px}
+.box{position:absolute;border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border-radius:18px;padding:16px 18px}
+.box h3{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8d93a8;margin-bottom:10px;font-weight:600}
+.big{font-size:19px;font-weight:700;margin-bottom:6px}
+.t{font-size:13.5px;color:#b8bdcc;line-height:1.5}
+.chip{display:inline-block;font:600 11.5px 'JetBrains Mono';padding:3px 8px;border-radius:7px;margin:3px 4px 0 0;border:1px solid}
+.emp{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06)}
+.emp:first-of-type{border-top:0}
+.emp img{width:34px;height:34px;border-radius:50%}
+.emp b{font-size:14px}.emp small{display:block;font-size:11.5px;color:#8d93a8}
+.emp .tools{margin-left:auto;text-align:right;max-width:210px}
+svg.wires{position:absolute;inset:0}
+.lbl{font:600 12px 'JetBrains Mono';fill:#a5b4fc}
+</style></head><body><div class="bg"></div><div class="grid"></div>
+<h1>Haven · <span>system architecture</span></h1>
+<div class="sub">One human founder, eight AI employees, fourteen sponsor tools — every arrow below is a real code path in this repo.</div>
+
+<svg class="wires" viewBox="0 0 1800 1120">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8b9bff"/></marker>
+    <linearGradient id="gw" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1800" y2="0"><stop offset="0" stop-color="#8b5cf6"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+  </defs>
+  <g stroke="url(#gw)" stroke-width="2.2" fill="none" marker-end="url(#a)" opacity=".85">
+    <path d="M330 330 C 390 330, 400 330, 455 330"/>
+    <path d="M745 330 C 790 330, 800 330, 850 330"/>
+    <path d="M1190 250 C 1250 250, 1260 210, 1310 210"/>
+    <path d="M1190 380 C 1250 380, 1260 470, 1310 470"/>
+    <path d="M1020 560 C 1020 610, 1020 620, 1020 660"/>
+    <path d="M600 470 C 600 560, 600 600, 600 660"/>
+    <path d="M1450 690 C 1450 640, 1450 640, 1450 600"/>
+    <path d="M330 860 C 390 860, 400 860, 455 860"/>
+  </g>
+  <text class="lbl" x="350" y="318">WebSocket</text>
+  <text class="lbl" x="762" y="318">BAND</text>
+  <text class="lbl" x="1208" y="222">tools</text>
+  <text class="lbl" x="1208" y="440">models</text>
+  <text class="lbl" x="1032" y="620">state</text>
+  <text class="lbl" x="612" y="590">events</text>
+</svg>
+
+<div class="box" style="left:60px;top:150px;width:270px;height:360px">
+  <h3>Humans</h3>
+  <div class="big">Founder (CEO)</div>
+  <div class="t">Approves bans, takes over crisis cases, asks Iris questions, hears Aria's spoken briefing.</div>
+  <div class="big" style="margin-top:18px">Community members</div>
+  <div class="t">Chat in Glimmer communities (Maskord-style UI). Threat Lab injects phishing, scams, raids, harassment and crisis messages.</div>
+  <div style="margin-top:12px"><span class="chip" style="color:#f472b6;border-color:#f472b655">Masky.AI</span><span class="chip" style="color:#f472b6;border-color:#f472b655">Maskord</span></div>
+</div>
+
+<div class="box" style="left:455px;top:150px;width:290px;height:320px">
+  <h3>Haven HQ · web</h3>
+  <div class="big">React 19 + Vite + motion</div>
+  <div class="t">Mission Control constellation · Community client · Incident Room · Bot Audits · Ask Haven · Pipelines & Flows · Founder Briefing · Sponsor Stack.</div>
+  <div class="t" style="margin-top:10px">Live via WebSocket events: <span style="font-family:JetBrains Mono;font-size:12px;color:#a5f3fc">band.message · pipeline.stage · incident.upsert · voice.say · forensics.step</span></div>
+</div>
+
+<div class="box" style="left:850px;top:150px;width:340px;height:410px">
+  <h3>AI workforce · server/src/agents</h3>
+  <div class="emp"><img src="../assets/avatars/aria.svg"><div><b>Aria</b><small>Chief of Staff — routes & decides</small></div><div class="tools"><span class="chip" style="color:#a78bfa;border-color:#a78bfa55">Kylon</span><span class="chip" style="color:#22d3ee;border-color:#22d3ee55">BAND</span></div></div>
+  <div class="emp"><img src="../assets/avatars/nova.svg"><div><b>Nova</b><small>Triage — every message</small></div><div class="tools"><span class="chip" style="color:#f97316;border-color:#f9731655">RocketRide</span></div></div>
+  <div class="emp"><img src="../assets/avatars/rex.svg"><div><b>Rex</b><small>Link forensics</small></div><div class="tools"><span class="chip" style="color:#fbbf24;border-color:#fbbf2455">AdaL</span><span class="chip" style="color:#38bdf8;border-color:#38bdf855">Celesto</span></div></div>
+  <div class="emp"><img src="../assets/avatars/mira.svg"><div><b>Mira</b><small>Crisis & wellbeing</small></div><div class="tools"><span class="chip" style="color:#f472b6;border-color:#f472b655">Masky</span><span class="chip" style="color:#ea4b71;border-color:#ea4b7155">n8n</span></div></div>
+  <div class="emp"><img src="../assets/avatars/kai.svg"><div><b>Kai</b><small>Bot security audits</small></div><div class="tools"><span class="chip" style="color:#a78bfa;border-color:#a78bfa55">Snyk</span><span class="chip" style="color:#60a5fa;border-color:#60a5fa55">Tenki</span><span class="chip" style="color:#818cf8;border-color:#818cf855">Prelint</span></div></div>
+  <div class="emp"><img src="../assets/avatars/iris.svg"><div><b>Iris · Juno · Leo</b><small>Data · Policy · Growth</small></div><div class="tools"><span class="chip" style="color:#facc15;border-color:#facc1555">PromptQL</span><span class="chip" style="color:#fb7185;border-color:#fb718555">Finch</span></div></div>
+</div>
+
+<div class="box" style="left:1310px;top:150px;width:430px;height:180px">
+  <h3>Execution tools</h3>
+  <div class="t"><b>Rex</b> detonates links in an isolated <b>Celesto</b> computer (or local sandboxed Chromium) driven by an <b>AdaL</b> browser workflow → screenshot, redirects, forms, lookalike domains.<br><b>Kai</b> runs <b>Snyk</b> on bot deps, executes tests in a <b>Tenki</b> sandbox, checks permissions against the <b>Prelint</b> spec.</div>
+</div>
+<div class="box" style="left:1310px;top:350px;width:430px;height:240px">
+  <h3>Model gateway · Flatkey</h3>
+  <div class="t">Every call is a <i>tier</i>: <span class="chip" style="color:#c084fc;border-color:#c084fc55">fast</span><span class="chip" style="color:#c084fc;border-color:#c084fc55">reasoning</span><span class="chip" style="color:#c084fc;border-color:#c084fc55">coding</span><span class="chip" style="color:#c084fc;border-color:#c084fc55">vision</span><br>One key, 300+ models, cross-model failover, per-call cost + latency logged. Falls back to direct keys → local Claude CLI → deterministic offline brain, so the company never stops.<br><b>Paritok</b> compresses long-running agent memory before it reaches a model.</div>
+</div>
+
+<div class="box" style="left:455px;top:660px;width:290px;height:300px">
+  <h3>Automation · n8n</h3>
+  <div class="t">Importable workflows in <span style="font-family:JetBrains Mono">n8n/*.json</span>:<br>• community-onboarding<br>• moderator-alert<br>• crisis-escalation (page on-call)<br>• enforcement-log<br>• weekly-safety-report</div>
+  <div class="t" style="margin-top:10px">Executed on your n8n (N8N_URL) or by the built-in local executor.</div>
+</div>
+
+<div class="box" style="left:850px;top:660px;width:340px;height:300px">
+  <h3>Shared state · SQLite + PromptQL</h3>
+  <div class="t">communities · members · messages · incidents · band_messages · llm_calls · pipeline_runs · automation_runs · audits · compressions · wiki</div>
+  <div class="t" style="margin-top:10px"><b>Iris</b> answers natural-language questions over it (PromptQL MCP when configured; NL→SQL locally). The <b>shared context wiki</b> (blocklist, severity levels, crisis protocol) is read by every employee — and <b>Juno</b> writes new rules back after each incident.</div>
+</div>
+
+<div class="box" style="left:1310px;top:690px;width:430px;height:270px">
+  <h3>AI pipelines · RocketRide</h3>
+  <div class="t"><span style="font-family:JetBrains Mono">pipelines/*.pipe</span> (RocketRide Cloud format):<br>message-triage: webhook → anonymize_text → ner → guardrails → prompt → llm → extract_data → response<br>link-forensics · bot-audit · community-insights<br><br>Executed stage-by-stage (live in the UI) by Haven's runner, mirrored to RocketRide Cloud with ROCKETRIDE_APIKEY.</div>
+</div>
+
+<div class="box" style="left:60px;top:660px;width:270px;height:300px">
+  <h3>Skills & identity</h3>
+  <div class="t"><b>Finch</b> — <span style="font-family:JetBrains Mono">skills/*/SKILL.md</span> (crisis-deescalation, phishing-url-forensics, dependency-risk-audit…) injected into each employee's prompt; toggle per employee.<br><br><b>Kylon</b> — <span style="font-family:JetBrains Mono">kylon/workforce.yaml</span> team manifest, synced with the Kylon CLI.<br><br><b>Masky.AI</b> — faces + voices.</div>
+</div>
+
+<div style="position:absolute;left:60px;bottom:40px;right:60px;display:flex;justify-content:space-between;color:#5d6379;font:500 13px 'JetBrains Mono'">
+  <span>CI: GitHub Actions on Tenki runners · Snyk gate · Prelint spec review · AGENTS.md rules for Tenki Reviewer</span><span>github.com/vnmoorthy/haven</span>
+</div>
+</body></html>

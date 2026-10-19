@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Haven hero</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0}
+  body{width:1600px;height:760px;background:#05060a;font-family:Inter,sans-serif;color:#e8eaf2;overflow:hidden;position:relative}
+  .aurora{position:absolute;inset:0;background:
+    radial-gradient(900px 500px at 8% -10%, rgba(139,92,246,.40), transparent 60%),
+    radial-gradient(800px 460px at 100% 0%, rgba(34,211,238,.28), transparent 60%),
+    radial-gradient(700px 500px at 60% 130%, rgba(244,63,94,.18), transparent 60%)}
+  .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse at 40% 50%,#000 30%,transparent 75%)}
+  .wrap{position:relative;display:flex;height:100%;padding:56px 70px;gap:40px;align-items:center}
+  .left{flex:1.05}
+  .logo{display:flex;align-items:center;gap:16px;margin-bottom:26px}
+  .logo span{font-weight:800;font-size:34px;letter-spacing:-.02em}
+  .pill{display:inline-flex;gap:8px;align-items:center;font:500 14px 'JetBrains Mono';color:#a5f3fc;border:1px solid rgba(34,211,238,.35);background:rgba(34,211,238,.08);padding:7px 14px;border-radius:999px;margin-bottom:26px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 12px #10b981}
+  h1{font-size:54px;line-height:1.02;font-weight:800;letter-spacing:-.035em}
+  .g{background:linear-gradient(92deg,#c4b5fd,#8b5cf6 35%,#22d3ee 80%);-webkit-background-clip:text;color:transparent}
+  p.sub{margin-top:18px;font-size:20px;color:#9aa1b5;line-height:1.5;max-width:640px}
+  .stats{display:flex;gap:12px;margin-top:26px}
+  .stat{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);border-radius:16px;padding:14px 18px}
+  .stat b{display:block;font-size:26px;font-weight:700}
+  .stat i{font-style:normal;font-size:12.5px;color:#8d93a8;text-transform:uppercase;letter-spacing:.12em}
+  .right{flex:.95;position:relative;height:640px}
+  .card{position:absolute;border:1px solid rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.025));backdrop-filter:blur(12px);border-radius:20px;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+  .team{left:0;top:0;right:0;padding:20px}
+  .team h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#8d93a8;margin-bottom:16px}
+  .row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .emp{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+  .emp img{width:64px;height:64px;border-radius:50%}
+  .emp b{font-size:15px}.emp small{font-size:11px;color:#8d93a8;line-height:1.25}
+  .alert{left:0;top:372px;width:440px;padding:14px 16px;border-color:rgba(244,63,94,.45)}
+  .alert .t{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#fda4af;font-weight:600}
+  .alert .m{margin-top:8px;font-size:15px;line-height:1.45}
+  .alert code{font-family:'JetBrains Mono';font-size:13px;color:#fdba74;filter:blur(.6px)}
+  .wire{right:0;top:500px;width:470px;padding:14px 16px;font-family:'JetBrains Mono';font-size:12.5px;line-height:1.9;color:#b6bccb}
+  .wire .k{color:#22d3ee}.wire .v{color:#c4b5fd}.wire .ok{color:#34d399}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:26px;max-width:720px}
+  .chip{font:600 11.5px 'JetBrains Mono';padding:5px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#cfd3e0}
+</style></head>
+<body>
+<div class="aurora"></div><div class="grid"></div>
+<div class="wrap">
+  <div class="left">
+    <div class="logo"><svg width="52" height="52" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><path d="M32 4 8 13v17c0 15 10.4 26.7 24 30 13.6-3.3 24-15 24-30V13L32 4Z" fill="url(#g)"/><path d="M22 33.5 29 40l13.5-15" fill="none" stroke="#0b0d14" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Haven</span></div>
+    <div class="pill"><span class="dot"></span>AI-native Trust &amp; Safety company</div>
+    <h1>The AI Trust &amp; Safety team<br><span class="g">every community deserves.</span></h1>
+    <p class="sub">Eight AI employees catch phishing, scams, raids and harassment in under a second, look after members in crisis, and audit risky bots — with a human founder approving every ban.</p>
+    <div class="stats">
+      <div class="stat"><b>&lt; 1s</b><i>time to quarantine</i></div>
+      <div class="stat"><b>8 + 1</b><i>AI employees + founder</i></div>
+      <div class="stat"><b>14</b><i>sponsor tools</i></div>
+      <div class="stat"><b>24/7</b><i>never off shift</i></div>
+    </div>
+    <div class="chips"><span class="chip">Kylon</span><span class="chip">Masky.AI</span><span class="chip">BAND</span><span class="chip">n8n</span><span class="chip">RocketRide</span><span class="chip">AdaL</span><span class="chip">Celesto</span><span class="chip">Flatkey</span><span class="chip">PromptQL</span><span class="chip">Paritok</span><span class="chip">Finch</span><span class="chip">Tenki</span><span class="chip">Prelint</span><span class="chip">Snyk</span></div>
+  </div>
+  <div class="right">
+    <div class="card team"><h4>The workforce</h4>
+      <div class="row">
+        <div class="emp"><img src="../assets/avatars/aria.svg"><b>Aria</b><small>Chief of Staff</small></div>
+        <div class="emp"><img src="../assets/avatars/nova.svg"><b>Nova</b><small>Triage Analyst</small></div>
+        <div class="emp"><img src="../assets/avatars/rex.svg"><b>Rex</b><small>Threat Intel</small></div>
+        <div class="emp"><img src="../assets/avatars/mira.svg"><b>Mira</b><small>Wellbeing Lead</small></div>
+        <div class="emp"><img src="../assets/avatars/kai.svg"><b>Kai</b><small>Security Eng.</small></div>
+        <div class="emp"><img src="../assets/avatars/iris.svg"><b>Iris</b><small>Data Analyst</small></div>
+        <div class="emp"><img src="../assets/avatars/juno.svg"><b>Juno</b><small>Policy &amp; Product</small></div>
+        <div class="emp"><img src="../assets/avatars/leo.svg"><b>Leo</b><small>Growth &amp; CS</small></div>
+      </div>
+    </div>
+    <div class="card alert"><div class="t">🛡 Quarantined in 0.4s</div><div class="m">“Glimmer is gifting everyone 3 months of Premium… <code>glimmer-rewards-claim.xyz/claim</code>” — Rex detonated it in a sandbox: <b>credential harvester, score 94</b>.</div></div>
+    <div class="card wire">
+      <div><span class="k">BAND</span> nova → aria · <span class="v">inc_7f2: phishing (risk 86)</span></div>
+      <div><span class="k">BAND</span> aria → rex · <span class="v">detonate in Celesto sandbox</span></div>
+      <div><span class="k">BAND</span> rex → juno · <span class="v">new indicator → blocklist</span></div>
+      <div><span class="k">BAND</span> aria → founder · <span class="ok">approve ban? ✓ 1 click</span></div>
+    </div>
+  </div>
+</div>
+
+</body></html>

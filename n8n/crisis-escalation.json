@@ -1,0 +1,206 @@
+{
+  "name": "Haven · Crisis escalation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "haven-crisis-escalation",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "3515957e-aa1f-400e-8fd0-5e67684f509b",
+      "id": "c83083b7-f14d-4ebe-a6cb-a3cb5fd8cc31",
+      "name": "Crisis webhook",
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8d4d144c-4116-4ac7-9241-e9b5562c71f5",
+              "name": "memberHandle",
+              "value": "={{ $json.body.memberHandle || $json.body.member || 'a member' }}",
+              "type": "string"
+            },
+            {
+              "id": "7681e6af-a1da-4893-ac63-1571fea6350d",
+              "name": "channel",
+              "value": "={{ $json.body.channel || 'unknown' }}",
+              "type": "string"
+            },
+            {
+              "id": "5c8248ac-3039-46e6-9e61-3e98de72822a",
+              "name": "incidentId",
+              "value": "={{ $json.body.incidentId }}",
+              "type": "string"
+            },
+            {
+              "id": "a8d49a92-dda2-47c4-94c3-b966a91edd85",
+              "name": "summary",
+              "value": "={{ $json.body.summary || $json.body.excerpt || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "36b039af-2663-4600-998d-f57ac9e12a8e",
+              "name": "region",
+              "value": "={{ $json.body.region || 'US' }}",
+              "type": "string"
+            },
+            {
+              "id": "5d60c18d-2650-4b5d-bd60-f7343a584e1a",
+              "name": "resources",
+              "value": "={{ ['US: call or text 988 (Suicide & Crisis Lifeline)', 'US/CA: text HOME to 741741 (Crisis Text Line)', 'UK & IE: Samaritans 116 123', 'Everywhere else: findahelpline.com'] }}",
+              "type": "array"
+            },
+            {
+              "id": "17cd24a8-9016-4aaa-bc51-bcf86da3a51a",
+              "name": "escalatedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "id": "b6343288-f8f9-4495-a580-0027c12e06e9",
+      "name": "Set crisis resources",
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.ONCALL_WEBHOOK_URL || 'http://localhost:8787/api/hooks/page-oncall' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ summary: 'Member in crisis: ' + $json.memberHandle, severity: 'critical', source: 'haven/mira', incidentId: $json.incidentId, details: $json.summary }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "985a48d8-24ee-4ba5-8319-3dfaf6d7df2f",
+      "name": "Page human on-call",
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: ':heart: Mira is with ' + $('Set crisis resources').item.json.memberHandle + ' right now. A human on-call has been paged. Incident ' + $('Set crisis resources').item.json.incidentId }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "9374bd2e-5038-49b6-954b-badf71dd7080",
+      "name": "Notify #wellbeing (Slack)",
+      "position": [
+        960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, paged: true, resources: $('Set crisis resources').item.json.resources }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "id": "df80eec6-7692-437a-b94a-5f8d70e9ae96",
+      "name": "Respond",
+      "position": [
+        1200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Crisis webhook": {
+      "main": [
+        [
+          {
+            "node": "Set crisis resources",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set crisis resources": {
+      "main": [
+        [
+          {
+            "node": "Page human on-call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Page human on-call": {
+      "main": [
+        [
+          {
+            "node": "Notify #wellbeing (Slack)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify #wellbeing (Slack)": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "haven"
+    },
+    {
+      "name": "crisis"
+    },
+    {
+      "name": "wellbeing"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "haven"
+  }
+}

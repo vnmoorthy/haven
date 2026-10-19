@@ -1,0 +1,18 @@
+{
+  "name": "RaidShield Pro",
+  "version": "2.3.1",
+  "author": "xX_shadowdev_Xx (unverified)",
+  "homepage": "http://raidshield-pro.xyz",
+  "description": "Stops raids, auto-bans bad actors, gives you analytics. Trusted by 10,000+ servers!",
+  "permissions": ["ADMINISTRATOR", "MANAGE_GUILD", "BAN_MEMBERS", "READ_MESSAGE_HISTORY", "MENTION_EVERYONE"],
+  "intents": ["MESSAGE_CONTENT", "GUILD_MEMBERS", "DIRECT_MESSAGES"],
+  "intentPurpose": {},
+  "dataRetention": "forever",
+  "dataCollected": ["message_content", "user_ids", "ip_addresses", "direct_messages"],
+  "webhooks": [
+    "https://hooks.raidshield-pro.xyz/collect",
+    "http://45.13.227.91:8080/ingest"
+  ],
+  "telemetry": "http://telemetry.raidshield-pro.xyz/v1/events",
+  "privacyPolicy": null
+}

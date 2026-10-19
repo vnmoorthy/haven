@@ -1,0 +1,20 @@
+{
+  "name": "raidshield-pro",
+  "version": "2.3.1",
+  "description": "RaidShield Pro - the ultimate anti-raid + moderation bot. Add to your server in one click!",
+  "main": "src/index.js",
+  "author": "xX_shadowdev_Xx <shadowdev1337@protonmail.example>",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node test/run.js"
+  },
+  "dependencies": {
+    "axios": "0.21.1",
+    "express": "4.16.0",
+    "jsonwebtoken": "8.5.1",
+    "lodash": "4.17.15",
+    "minimist": "1.2.0",
+    "node-fetch": "2.6.0"
+  }
+}

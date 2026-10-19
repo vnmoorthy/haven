@@ -1,0 +1,212 @@
+{
+  "name": "Haven · Community onboarding",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "haven-community-onboarding",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "webhookId": "0e1071b1-e7fe-4a24-a3f5-8f0d4c2ee50a",
+      "id": "b4a90644-e448-4dbc-a5c1-18d0304b2f30",
+      "name": "Onboarding webhook",
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b0977fe1-b4c7-47d1-b982-1b5df0474fce",
+              "name": "tenantId",
+              "value": "={{ 'tnt_' + String($json.body.id || $json.body.name || 'community').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "a4b89aa8-9504-480b-806e-f976fd6f7615",
+              "name": "name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "69d58131-84ab-43d8-b831-c08453900a0b",
+              "name": "platform",
+              "value": "={{ $json.body.platform || 'Discord' }}",
+              "type": "string"
+            },
+            {
+              "id": "89c2f9ca-bf06-4b47-900d-a60086877499",
+              "name": "plan",
+              "value": "={{ $json.body.plan || 'Starter' }}",
+              "type": "string"
+            },
+            {
+              "id": "040062a3-1c05-48e8-b8b0-daf009a9819d",
+              "name": "members",
+              "value": "={{ Number($json.body.members || 0) }}",
+              "type": "number"
+            },
+            {
+              "id": "53ca98f5-8d0e-4486-bdd5-27774b5a47ed",
+              "name": "ownerEmail",
+              "value": "={{ $json.body.ownerEmail || 'founders@' + String($json.body.name || 'community').toLowerCase().replace(/[^a-z0-9]+/g, '') + '.community' }}",
+              "type": "string"
+            },
+            {
+              "id": "d0a96f2b-27a5-4e77-b189-f89a4e8a769e",
+              "name": "onboardedAt",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "id": "6cb67bfe-3ebf-4746-9e5f-0821de48f315",
+      "name": "Set tenant",
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8787/api/hooks/onboarded",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput",
+      "id": "5aed7051-7e7e-4c21-96e1-adda15c28655",
+      "name": "Provision tenant in Haven",
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "aria@haven.ai",
+        "toEmail": "={{ $('Set tenant').item.json.ownerEmail }}",
+        "subject": "=Welcome to Haven, {{ $('Set tenant').item.json.name }} — your AI safety team is live",
+        "emailFormat": "text",
+        "text": "=Hi {{ $('Set tenant').item.json.name }} team,\n\nAria, Nova, Rex, Mira, Kai, Iris, Juno and Leo are now protecting your {{ $('Set tenant').item.json.platform }} community ({{ $('Set tenant').item.json.members }} members) on the {{ $('Set tenant').item.json.plan }} plan.\n\nWhat happens next:\n- Nova screens every message in under a second\n- Rex detonates suspicious links in an isolated sandbox\n- Mira responds to members in crisis and pages your on-call\n- Iris sends a weekly safety report every Monday\n\nTenant ID: {{ $('Set tenant').item.json.tenantId }}\n\n— Aria, Chief of Staff, Haven",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "credentials": {
+        "smtp": {
+          "id": "haven-smtp",
+          "name": "Haven SMTP"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "id": "dcdbccc0-964a-446c-ba70-f8fff353a932",
+      "name": "Email welcome pack",
+      "position": [
+        960,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, tenantId: $('Set tenant').item.json.tenantId, welcomeSentTo: $('Set tenant').item.json.ownerEmail }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "id": "cb33fa16-4961-4e0d-b00c-c6eaebbc5b9a",
+      "name": "Respond",
+      "position": [
+        1200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Onboarding webhook": {
+      "main": [
+        [
+          {
+            "node": "Set tenant",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set tenant": {
+      "main": [
+        [
+          {
+            "node": "Provision tenant in Haven",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Provision tenant in Haven": {
+      "main": [
+        [
+          {
+            "node": "Email welcome pack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email welcome pack": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "haven"
+    },
+    {
+      "name": "onboarding"
+    },
+    {
+      "name": "growth"
+    }
+  ],
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "haven"
+  }
+}

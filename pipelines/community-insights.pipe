@@ -1,0 +1,139 @@
+{
+  "components": [
+    {
+      "id": "chat_1",
+      "provider": "chat",
+      "name": "Founder question",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "parameters": {},
+        "type": "chat"
+      },
+      "ui": {
+        "position": {
+          "x": 60,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "question_1",
+      "provider": "question",
+      "name": "Load community safety series",
+      "config": {
+        "parameters": {}
+      },
+      "input": [
+        {
+          "lane": "questions",
+          "from": "chat_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 320,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "anomaly_detector_1",
+      "provider": "anomaly_detector",
+      "name": "Anomaly detection (z-score)",
+      "config": {
+        "parameters": {
+          "threshold": 2
+        }
+      },
+      "input": [
+        {
+          "lane": "table",
+          "from": "question_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 580,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "prompt_1",
+      "provider": "prompt",
+      "name": "Insight writer prompt",
+      "config": {
+        "parameters": {
+          "instructions": "Write 3-5 crisp weekly safety insights for the founders. Return JSON {headline, insights[]}."
+        }
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "anomaly_detector_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 840,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "llm_openai_1",
+      "provider": "llm_openai",
+      "name": "Flatkey model gateway (fast tier)",
+      "config": {
+        "profile": "openai-4o",
+        "openai-4o": {
+          "apikey": "${ROCKETRIDE_FLATKEY_KEY}"
+        },
+        "parameters": {
+          "base_url": "https://router.flatkey.ai/v1",
+          "model": "gpt-4o-mini"
+        }
+      },
+      "input": [
+        {
+          "lane": "questions",
+          "from": "prompt_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1100,
+          "y": 160
+        }
+      }
+    },
+    {
+      "id": "response_answers_1",
+      "provider": "response_answers",
+      "name": "Weekly insights",
+      "config": {
+        "parameters": {}
+      },
+      "input": [
+        {
+          "lane": "answers",
+          "from": "llm_openai_1"
+        }
+      ],
+      "ui": {
+        "position": {
+          "x": 1360,
+          "y": 160
+        }
+      }
+    }
+  ],
+  "project_id": "2fa351b4-3758-4eab-9620-3abbd157ebb5",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "version": 1
+}

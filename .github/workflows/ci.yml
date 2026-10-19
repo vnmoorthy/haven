@@ -1,0 +1,47 @@
+# Haven CI — Kai (Security Engineer) and Juno (Policy & Product) gate every change.
+# Runs on Tenki runners when the org is connected (set repo variable TENKI_RUNNER=tenki-standard-small-2c-4g),
+# otherwise falls back to GitHub-hosted runners so CI never queues forever.
+name: ci
+on:
+  push: { branches: [main] }
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: Build & typecheck (Tenki runner)
+    runs-on: ${{ vars.TENKI_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - name: Validate RocketRide .pipe and n8n workflow JSON
+        run: |
+          for f in pipelines/*.pipe n8n/*.json; do node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" && echo "ok  $f"; done
+
+  snyk:
+    name: Snyk (deps + code)
+    runs-on: ${{ vars.TENKI_RUNNER || 'ubuntu-latest' }}
+    env: { SNYK_TOKEN: '${{ secrets.SNYK_TOKEN }}' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - if: env.SNYK_TOKEN != ''
+        run: npx -y snyk@latest test --all-projects --exclude=samples --severity-threshold=high
+      - if: env.SNYK_TOKEN != ''
+        run: npx -y snyk@latest code test --severity-threshold=high || true
+
+  spec-guard:
+    name: Trust & Safety spec guard (mirrors the Prelint review)
+    runs-on: ${{ vars.TENKI_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crisis messages must never be auto-removed (TS-001)
+        run: |
+          ! grep -nE "kind === 'crisis'.*status: 'removed'" server/src/agents/company.ts
+      - name: Bans require founder approval (TS-003)
+        run: grep -q "requestApproval" server/src/agents/company.ts
